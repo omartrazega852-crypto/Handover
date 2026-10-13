@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nursing Handover · Smart Shift Manager Pro+</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif; }
+
+        :root {
+            --primary: #0d5c8c;
+            --primary-dark: #083f63;
+            --primary-light: #e8f3fc;
+            --accent: #10b981;
+            --accent-dark: #059669;
+            --accent-light: #d1fae5;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --purple: #8b5cf6;
+            --purple-light: #ede9fe;
+            --pink: #ec4899;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 12px rgba(15,23,42,0.06);
+            --shadow-lg: 0 12px 32px rgba(15,23,42,0.12);
+        }
+
+        body {
+            background: linear-gradient(135deg, #eef5fb 0%, #f5f0ff 50%, #eef9f4 100%);
+            background-attachment: fixed;
+            padding: 20px;
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 15px;
+        }
+
+        .app-container { max-width: 1600px; margin: 0 auto; }
+
+        /* ============ LOGIN SCREEN ============ */
+        .login-screen {
+            position: fixed; inset: 0; z-index: 5000;
+            background: linear-gradient(135deg, #0a2b4e 0%, #0d5c8c 50%, #10b981 100%);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            transition: opacity 0.4s, visibility 0.4s;
+        }
+
+        .login-screen.hidden { opacity: 0; visibility: hidden; }
+
+        .login-box {
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 48px 44px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.35);
+            animation: modalIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-box::before {
+            content: '';
+            position: absolute; top: -100px; right: -100px;
+            width: 250px; height: 250px;
+            background: radial-gradient(circle, rgba(16,185,129,0.15), transparent 70%);
+            border-radius: 50%;
+        }
+
+        .login-logo {
+            width: 72px; height: 72px;
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+            border-radius: 22px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 20px;
+            box-shadow: 0 12px 32px rgba(16,185,129,0.4);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 12px 32px rgba(16,185,129,0.4); }
+            50% { box-shadow: 0 12px 42px rgba(16,185,129,0.65); }
+        }
+
+        .login-box h2 {
+            text-align: center; font-weight: 700; font-size: 1.6rem;
+            color: var(--primary-dark); margin-bottom: 6px;
+        }
+
+        .login-box .subtitle {
+            text-align: center; color: var(--text-muted); font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+
+        .login-form-group { margin-bottom: 18px; position: relative; z-index: 1; }
+
+        .login-form-group label {
+            display: block; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--text-muted); margin-bottom: 6px;
+        }
+
+        .login-form-group input {
+            width: 100%; padding: 14px 18px;
+            border-radius: 14px; border: 1.5px solid var(--border);
+            font-size: 0.95rem; background: #f8fafc;
+            transition: all 0.2s; font-family: inherit;
+        }
+
+        .login-form-group input:focus {
+            outline: none; border-color: var(--primary);
+            background: white; box-shadow: 0 0 0 4px rgba(13,92,140,0.12);
+        }
+
+        .login-btn {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, #0d5c8c, #0a2b4e);
+            color: white; border: none; border-radius: 14px;
+            font-weight: 700; font-size: 1rem; cursor: pointer;
+            transition: all 0.25s; margin-top: 8px;
+            box-shadow: 0 8px 20px rgba(13,92,140,0.35);
+            position: relative; z-index: 1;
+        }
+
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(13,92,140,0.5); }
+        .login-btn:active { transform: scale(0.98); }
+
+        .login-hint {
+            text-align: center; margin-top: 18px;
+            font-size: 0.78rem; color: var(--text-muted);
+            background: #f1f5f9; padding: 10px; border-radius: 10px;
+            position: relative; z-index: 1;
+        }
+
+        .login-hint strong { color: var(--primary); }
+
+        /* ============ HEADER ============ */
+        .app-header {
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+            background: linear-gradient(135deg, #0a2b4e 0%, #0d5c8c 60%, #1e7e9c 100%);
+            color: white; padding: 20px 28px; border-radius: 28px; margin-bottom: 24px;
+            box-shadow: 0 12px 32px rgba(10,43,78,0.25);
+            position: relative; overflow: hidden;
+        }
+
+        .app-header::before {
+            content: ''; position: absolute; top: -50%; right: -10%; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%); border-radius: 50%;
+        }
+
+        .app-header::after {
+            content: ''; position: absolute; bottom: -80%; left: 5%; width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(16,185,129,0.15), transparent 70%); border-radius: 50%;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+
+        .logo-icon {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+            border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            font-size: 26px; box-shadow: 0 8px 20px rgba(16,185,129,0.35);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        .app-header h1 { font-weight: 700; font-size: 1.55rem; letter-spacing: -0.3px; }
+        .app-header h1 span {
+            display: block; font-weight: 400; font-size: 0.8rem; margin-top: 3px;
+            color: rgba(255,255,255,0.75); letter-spacing: 0.5px; text-transform: uppercase;
+        }
+
+        .user-info {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px; border-radius: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative; z-index: 1;
+        }
+
+        .user-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.85rem;
+        }
+
+        .user-info .user-name { font-weight: 600; font-size: 0.85rem; }
+        .user-info .user-role { font-size: 0.7rem; opacity: 0.8; }
+
+        .header-actions { display: flex; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; align-items: center; }
+
+        .btn {
+            background: white; border: none; padding: 10px 18px; border-radius: 40px;
+            font-weight: 600; font-size: 0.85rem; cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            color: var(--primary-dark); display: inline-flex; align-items: center; gap: 6px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08); white-space: nowrap;
+        }
+
+        .btn:active { transform: scale(0.97); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white; box-shadow: 0 4px 14px rgba(16,185,129,0.4);
+        }
+        .btn-primary:hover { box-shadow: 0 8px 22px rgba(16,185,129,0.55); transform: translateY(-2px); }
+
+        .btn-secondary { background: rgba(255,255,255,0.95); color: var(--primary-dark); }
+        .btn-secondary:hover { background: white; transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,0.15); }
+
+        .btn-glass {
+            background: rgba(255,255,255,0.15); color: white;
+            border: 1px solid rgba(255,255,255,0.25); backdrop-filter: blur(10px);
+        }
+        .btn-glass:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626); color: white;
+            box-shadow: 0 4px 14px rgba(239,68,68,0.4);
+        }
+        .btn-danger:hover { box-shadow: 0 8px 22px rgba(239,68,68,0.55); transform: translateY(-2px); }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white;
+            box-shadow: 0 4px 14px rgba(139,92,246,0.4);
+        }
+        .btn-purple:hover { box-shadow: 0 8px 22px rgba(139,92,246,0.55); transform: translateY(-2px); }
+
+        .btn-sm { padding: 6px 14px; font-size: 0.78rem; }
+
+        /* ============ FLOOR SELECTOR ============ */
+        .floor-selector {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px;
+            background: var(--surface); padding: 10px; border-radius: 20px;
+            box-shadow: var(--shadow); align-items: center;
+        }
+
+        .floor-btn {
+            background: transparent; border: none; padding: 12px 24px; border-radius: 14px;
+            font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            color: var(--text-muted); display: flex; align-items: center; gap: 8px; font-size: 0.88rem;
+        }
+
+        .floor-btn .badge-count {
+            background: rgba(13,92,140,0.1); color: var(--primary);
+            padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;
+        }
+
+        .floor-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; box-shadow: 0 6px 18px rgba(13,92,140,0.35);
+        }
+
+        .floor-btn.active .badge-count { background: rgba(255,255,255,0.25); color: white; }
+        .floor-btn:not(.active):hover { background: var(--primary-light); color: var(--primary); }
+
+        /* ============ STATS ============ */
+        .dashboard-stats {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px; margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--surface); padding: 18px 20px; border-radius: 20px;
+            box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1); cursor: pointer;
+            position: relative; overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 4px; height: 100%; background: var(--primary); border-radius: 20px 0 0 20px;
+        }
+
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+        .stat-icon {
+            width: 44px; height: 44px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+        }
+
+        .stat-blue::before { background: linear-gradient(180deg, #3b82f6, #1e40af); }
+        .stat-blue .stat-icon { background: #dbeafe; }
+        .stat-green::before { background: linear-gradient(180deg, #10b981, #047857); }
+        .stat-green .stat-icon { background: #d1fae5; }
+        .stat-orange::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
+        .stat-orange .stat-icon { background: #fef3c7; }
+        .stat-purple::before { background: linear-gradient(180deg, #8b5cf6, #6d28d9); }
+        .stat-purple .stat-icon { background: #ede9fe; }
+        .stat-red::before { background: linear-gradient(180deg, #ef4444, #b91c1c); }
+        .stat-red .stat-icon { background: #fee2e2; }
+        .stat-cyan::before { background: linear-gradient(180deg, #06b6d4, #0e7490); }
+        .stat-cyan .stat-icon { background: #cffafe; }
+
+        .stat-content h4 {
+            font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px;
+            color: var(--text-muted); font-weight: 700; margin-bottom: 2px;
+        }
+        .stat-content .value { font-size: 1.6rem; font-weight: 700; color: var(--text); line-height: 1; }
+
+        /* ============ BED GRID ============ */
+        .bed-grid-container {
+            background: var(--surface); border-radius: 28px; padding: 24px;
+            margin-bottom: 24px; box-shadow: var(--shadow);
+        }
+
+        .bed-grid-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding: 0 4px; flex-wrap: wrap; gap: 12px;
+        }
+
+        .bed-grid-header h3 {
+            font-weight: 700; color: var(--text); font-size: 1.15rem;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .bed-grid-header h3::before {
+            content: ''; width: 4px; height: 22px;
+            background: linear-gradient(180deg, var(--primary), var(--accent)); border-radius: 4px;
+        }
+
+        .legend { display: flex; gap: 16px; font-size: 0.78rem; color: var(--text-muted); }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        .bed-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px;
+        }
+
+        .bed-card {
+            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--border); border-radius: 18px; padding: 14px 8px;
+            text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            min-height: 92px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; position: relative; overflow: hidden;
+        }
+
+        .bed-card::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(16,185,129,0.08), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+
+        .bed-card:hover { border-color: var(--accent); transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 24px rgba(16,185,129,0.2); }
+        .bed-card:hover::after { opacity: 1; }
+
+        .bed-card .bed-number { font-size: 1.05rem; font-weight: 700; color: var(--text); position: relative; z-index: 1; }
+        .bed-card .patient-name {
+            font-size: 0.7rem; color: var(--text-muted); margin-top: 6px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 100%; padding: 0 4px; position: relative; z-index: 1; font-weight: 500;
+        }
+
+        .bed-card.occupied {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-color: #10b981;
+        }
+
+        .bed-card.occupied::before {
+            content: '●'; position: absolute; top: 6px; right: 8px;
+            color: #10b981; font-size: 0.75rem; animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        .bed-card.occupied .bed-number { color: var(--accent-dark); }
+        .bed-card.occupied .patient-name { color: #065f46; font-weight: 600; }
+
+        /* ============ TODO ============ */
+        .todo-section {
+            background: var(--surface); border-radius: 24px; padding: 22px 26px;
+            margin-bottom: 24px; box-shadow: var(--shadow);
+        }
+
+        .todo-section h3 {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 700; color: var(--text); margin-bottom: 16px; font-size: 1.05rem;
+        }
+
+        .todo-section h3::before { content: '📌'; font-size: 1.2rem; }
+
+        .todo-list {
+            display: flex; flex-direction: column; gap: 10px;
+            max-height: 340px; overflow-y: auto; padding-right: 4px;
+        }
+
+        .todo-list::-webkit-scrollbar { width: 6px; }
+        .todo-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        .todo-item {
+            display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(90deg, #fff7ed, #fef3c7);
+            padding: 12px 16px; border-radius: 14px; font-size: 0.88rem;
+            border-left: 4px solid var(--warning); transition: all 0.25s;
+            gap: 12px; animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .todo-item:hover { transform: translateX(4px); box-shadow: 0 4px 14px rgba(245,158,11,0.2); }
+        .todo-item .todo-info { flex: 1; }
+        .todo-item .todo-info strong { color: var(--primary); }
+        .todo-item .todo-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+        .todo-badge {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            color: white; border-radius: 30px; padding: 3px 10px;
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+        }
+
+        .btn-done {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white; border: none; padding: 6px 12px; border-radius: 30px;
+            font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 4px;
+        }
+
+        .btn-done:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(16,185,129,0.4); }
+
+        /* ============ MODAL ============ */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; padding: 20px; animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal {
+            background: white; border-radius: 32px; max-width: 1000px; width: 100%;
+            max-height: 92vh; overflow-y: auto; padding: 32px 36px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.92) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal h2 {
+            font-weight: 700; font-size: 1.5rem; color: var(--text);
+            margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .modal-badge {
+            display: inline-block; background: var(--primary-light); color: var(--primary);
+            padding: 4px 14px; border-radius: 30px; font-size: 0.78rem;
+            font-weight: 700; margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: #f1f5f9; border: none; width: 36px; height: 36px;
+            border-radius: 50%; font-size: 1.3rem; cursor: pointer;
+            color: var(--text-muted); line-height: 1; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .modal-close:hover { background: var(--danger-light); color: var(--danger); transform: rotate(90deg); }
+
+        .form-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px; margin: 16px 0;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+        .form-group label {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; color: var(--text-muted);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 11px 16px; border-radius: 12px; border: 1.5px solid var(--border);
+            font-size: 0.9rem; background: #f8fafc; transition: all 0.2s;
+            font-family: inherit; color: var(--text);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--primary); background: white;
+            box-shadow: 0 0 0 4px rgba(13,92,140,0.12);
+        }
+
+        .checkbox-group {
+            display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+            margin: 6px 0; padding: 10px 12px; background: #f8fafc;
+            border-radius: 12px; border: 1.5px dashed var(--border);
+        }
+
+        .checkbox-group label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.85rem; font-weight: 600; text-transform: none;
+            color: var(--text); cursor: pointer; padding: 6px 12px;
+            border-radius: 20px; transition: all 0.2s;
+        }
+
+        .checkbox-group label:hover { background: var(--primary-light); }
+        .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+
+        .section-title {
+            font-size: 0.85rem; font-weight: 700; color: var(--primary-dark);
+            margin: 20px 0 4px; padding: 6px 0 6px 12px;
+            border-left: 4px solid var(--accent);
+            background: linear-gradient(90deg, var(--accent-light), transparent);
+            border-radius: 4px; text-transform: uppercase; letter-spacing: 0.6px;
+        }
+
+        .modal-actions {
+            display: flex; justify-content: flex-end; gap: 12px;
+            margin-top: 28px; padding-top: 20px;
+            border-top: 1px solid var(--border); flex-wrap: wrap;
+        }
+
+        .transfer-selector {
+            display: flex; gap: 12px; align-items: center; margin-top: 8px;
+            flex-wrap: wrap; padding: 12px; background: var(--purple-light); border-radius: 14px;
+        }
+
+        .transfer-selector span { font-weight: 600; color: var(--purple); font-size: 0.85rem; }
+
+        .transfer-selector select {
+            flex: 1; min-width: 140px; padding: 9px 14px;
+            border-radius: 10px; border: 1.5px solid #d8b4fe;
+            background: white; font-size: 0.85rem;
+        }
+
+        .task-builder { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+        .task-builder input { flex: 1; min-width: 200px; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 0.88rem; }
+        .task-builder select { padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 0.88rem; background: white; }
+
+        .task-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; margin-top: 8px; }
+
+        .task-chip {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f1f5f9; padding: 8px 12px; border-radius: 10px;
+            font-size: 0.82rem; gap: 8px;
+        }
+
+        .task-chip.pending { background: #fef3c7; border-left: 3px solid var(--warning); }
+        .task-chip.done { background: #d1fae5; border-left: 3px solid var(--accent); text-decoration: line-through; opacity: 0.7; }
+        .task-chip .chip-actions { display: flex; gap: 6px; }
+
+        .chip-btn {
+            background: white; border: 1px solid var(--border);
+            width: 26px; height: 26px; border-radius: 8px;
+            cursor: pointer; font-size: 0.8rem; display: flex;
+            align-items: center; justify-content: center; transition: all 0.2s;
+        }
+
+        .chip-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .chip-btn.done-btn:hover { background: var(--accent); border-color: var(--accent); }
+        .chip-btn.del-btn:hover { background: var(--danger); border-color: var(--danger); }
+
+        .modal-tabs {
+            display: flex; gap: 4px; margin-bottom: 20px;
+            border-bottom: 2px solid var(--border); flex-wrap: wrap;
+        }
+
+        .modal-tab {
+            padding: 10px 18px; background: transparent; border: none;
+            font-weight: 600; font-size: 0.85rem; color: var(--text-muted);
+            cursor: pointer; border-bottom: 3px solid transparent;
+            margin-bottom: -2px; transition: all 0.2s;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-tab:hover { background: var(--primary-light); color: var(--primary); }
+        .modal-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+        /* ============ ENDORSEMENT ============ */
+        .endorsement-panel {
+            background: white; border-radius: 28px; padding: 28px;
+            margin-top: 24px; box-shadow: var(--shadow-lg);
+            animation: modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        .endorsement-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+
+        .endorsement-header h3 {
+            font-weight: 700; color: var(--text); font-size: 1.2rem;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .endorsement-header h3::before { content: '📄'; font-size: 1.3rem; }
+
+        .endorsement-table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            font-size: 0.82rem; border-radius: 14px; overflow: hidden;
+        }
+
+        .endorsement-table th {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white; padding: 12px 10px; text-align: left;
+            font-weight: 600; font-size: 0.7rem; text-transform: uppercase;
+            letter-spacing: 0.6px; white-space: nowrap;
+        }
+
+        .endorsement-table td {
+            border-bottom: 1px solid var(--border); padding: 12px 10px;
+            vertical-align: top; background: white;
+        }
+
+        .endorsement-table tr:nth-child(even) td { background: #f8fafc; }
+        .endorsement-table tr:hover td { background: var(--primary-light); }
+        .endorsement-table td strong { color: var(--primary); font-weight: 700; }
+
+        /* ============ STATS PANEL ============ */
+        .stats-panel {
+            background: white; border-radius: 28px; padding: 28px;
+            margin-top: 24px; box-shadow: var(--shadow-lg);
+            animation: modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        .stats-panel h3 {
+            font-weight: 700; color: var(--text); font-size: 1.2rem;
+            margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+        }
+
+        .stats-panel h3::before { content: '📊'; font-size: 1.3rem; }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px; margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 18px; padding: 20px; text-align: center;
+            border: 1.5px solid var(--border); transition: all 0.3s;
+        }
+
+        .stat-box:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+        .stat-box .label {
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.8px;
+            color: var(--text-muted); font-weight: 700; margin-bottom: 8px;
+        }
+        .stat-box .num { font-size: 2.2rem; font-weight: 700; color: var(--primary); line-height: 1; }
+        .stat-box.green .num { color: var(--accent); }
+        .stat-box.orange .num { color: var(--warning); }
+        .stat-box.purple .num { color: var(--purple); }
+        .stat-box.red .num { color: var(--danger); }
+        .stat-box.pink .num { color: var(--pink); }
+
+        /* ============ HISTORY / ARCHIVE ============ */
+        .history-entry {
+            display: flex; gap: 12px; padding: 10px 14px;
+            background: #f8fafc; border-radius: 12px;
+            border-left: 3px solid var(--primary); font-size: 0.85rem;
+            animation: slideIn 0.3s ease-out; margin-bottom: 6px;
+        }
+
+        .history-entry.done { border-left-color: var(--accent); }
+        .history-entry.admission { border-left-color: var(--primary); }
+        .history-entry.discharge { border-left-color: var(--danger); }
+        .history-entry.transfer { border-left-color: var(--purple); }
+        .history-entry.surgery { border-left-color: var(--warning); }
+
+        .history-entry .h-time {
+            font-size: 0.72rem; color: var(--text-muted);
+            font-weight: 600; white-space: nowrap; min-width: 110px;
+        }
+
+        .history-entry .h-text { flex: 1; color: var(--text); }
+        .history-entry .h-text strong { color: var(--primary-dark); }
+
+        .history-timeline {
+            display: flex; flex-direction: column; gap: 6px;
+            max-height: 400px; overflow-y: auto; padding-right: 6px;
+        }
+
+        /* ============ SEARCH ============ */
+        .search-bar {
+            display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+
+        .search-bar input, .search-bar select {
+            flex: 1; min-width: 200px; padding: 12px 18px;
+            border-radius: 14px; border: 1.5px solid var(--border);
+            font-size: 0.9rem; background: white;
+            transition: all 0.2s;
+        }
+
+        .search-bar input:focus, .search-bar select:focus {
+            outline: none; border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(13,92,140,0.12);
+        }
+
+        .archive-card {
+            background: white; border-radius: 16px; padding: 18px;
+            margin-bottom: 12px; border-left: 4px solid var(--primary);
+            box-shadow: var(--shadow); transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .archive-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+        .archive-card h4 {
+            font-size: 1rem; color: var(--primary-dark); margin-bottom: 6px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 8px;
+        }
+
+        .archive-card .archive-meta {
+            display: flex; gap: 16px; flex-wrap: wrap;
+            font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;
+        }
+
+        .archive-card .archive-meta span { display: flex; align-items: center; gap: 4px; }
+
+        .archive-card .archive-detail {
+            font-size: 0.82rem; color: var(--text); line-height: 1.5;
+        }
+
+        .archive-card .status-badge {
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 0.68rem; font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-discharged { background: #fee2e2; color: #b91c1c; }
+        .status-active { background: #d1fae5; color: #065f46; }
+        .status-transferred { background: #ede9fe; color: #6d28d9; }
+
+        /* ============ TOAST ============ */
+        .toast {
+            position: fixed; bottom: 30px; right: 30px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white; padding: 14px 24px; border-radius: 14px;
+            box-shadow: 0 12px 32px rgba(16,185,129,0.4);
+            font-weight: 600; font-size: 0.9rem; z-index: 9000;
+            animation: toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .hidden { display: none !important; }
+
+        /* ============ PRINT STYLES ============ */
+        @media print {
+            body { background: white !important; padding: 0; }
+            .app-header, .floor-selector, .dashboard-stats, .bed-grid-container,
+            .todo-section, .btn, .header-actions, .modal-tabs, .tab-content:not(.active),
+            #loginScreen, .login-screen { display: none !important; }
+            .endorsement-panel, .stats-panel { box-shadow: none; padding: 0; margin: 0; }
+            .endorsement-table th { background: #0a2b4e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .endorsement-table td { background: white !important; }
+            .endorsement-panel h3::before, .stats-panel h3::before { content: ''; }
+            @page { size: landscape; margin: 12mm; }
+            .no-print { display: none !important; }
+            .print-header { display: block !important; text-align: center; margin-bottom: 20px; }
+        }
+
+        .print-header { display: none; }
+
+        @media (max-width: 640px) {
+            .app-header { padding: 16px 20px; }
+            .app-header h1 { font-size: 1.1rem; }
+            .modal { padding: 22px 20px; }
+            .bed-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+            .bed-card { min-height: 78px; padding: 10px 4px; }
+            .bed-card .bed-number { font-size: 0.9rem; }
+            .login-box { padding: 36px 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div class="login-screen" id="loginScreen">
+    <div class="login-box">
+        <div class="login-logo">🏥</div>
+        <h2>Nursing Handover</h2>
+        <p class="subtitle">Smart Shift Manager Pro+ · Secure Login</p>
+
+        <form id="loginForm">
+            <div class="login-form-group">
+                <label>Username</label>
+                <input type="text" id="loginUser" placeholder="Enter username" required autocomplete="username">
+            </div>
+            <div class="login-form-group">
+                <label>Password</label>
+                <input type="password" id="loginPass" placeholder="Enter password" required autocomplete="current-password">
+            </div>
+            <div class="login-form-group">
+                <label>Role</label>
+                <select id="loginRole" style="width:100%; padding:14px 18px; border-radius:14px; border:1.5px solid var(--border); background:#f8fafc; font-size:0.95rem; font-family:inherit;">
+                    <option value="Nurse">Nurse</option>
+                    <option value="Head Nurse">Head Nurse</option>
+                    <option value="Supervisor">Supervisor</option>
+                    <option value="Doctor">Doctor</option>
+                </select>
+            </div>
+            <button type="submit" class="login-btn">🔓 Sign In</button>
+            <div class="login-hint">
+                💡 Demo: any username &amp; password works.<br>
+                Example: <strong>nurse1</strong> / <strong>1234</strong>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============ MAIN APP ============ -->
+<div class="app-container" id="app" style="display:none;">
+    <!-- HEADER -->
+    <div class="app-header">
+        <div class="header-left">
+            <div class="logo-icon">🏥</div>
+            <div>
+                <h1>Nursing Handover <span>Smart Shift Manager Pro+</span></h1>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">N</div>
+                <div>
+                    <div class="user-name" id="userName">Nurse</div>
+                    <div class="user-role" id="userRole">Nurse</div>
+                </div>
+            </div>
+            <button class="btn btn-glass" id="archiveBtn">🗂️ Archive / Search</button>
+            <button class="btn btn-glass" id="statsBtn">📊 Statistics</button>
+            <button class="btn btn-glass" id="endorsementBtn">📋 Endorsements</button>
+            <button class="btn btn-primary" id="addPatientBtn">＋ Admit Patient</button>
+            <button class="btn btn-danger" id="logoutBtn">🚪</button>
+        </div>
+    </div>
+
+    <!-- FLOOR SELECTOR -->
+    <div class="floor-selector" id="floorSelector"></div>
+
+    <!-- STATS -->
+    <div class="dashboard-stats" id="dashboardStats"></div>
+
+    <!-- BED GRID -->
+    <div class="bed-grid-container">
+        <div class="bed-grid-header">
+            <h3 id="floorTitle">Second Floor</h3>
+            <div class="legend">
+                <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span> Occupied</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#cbd5e1"></span> Available</div>
+            </div>
+        </div>
+        <div class="bed-grid" id="bedGrid"></div>
+    </div>
+
+    <!-- TODO -->
+    <div class="todo-section">
+        <h3>TODO List · Tasks & Follow‑ups</h3>
+        <div class="todo-list" id="todoList"></div>
+    </div>
+
+    <!-- STATISTICS PANEL -->
+    <div class="stats-panel hidden" id="statsPanel">
+        <h3>Statistics — <span id="statsFloorName"></span></h3>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="section-title">📜 Admission / Discharge History (this floor)</div>
+        <div class="history-timeline" id="historyTimeline"></div>
+    </div>
+
+    <!-- ENDORSEMENT -->
+    <div class="endorsement-panel hidden" id="endorsementPanel">
+        <div class="print-header">
+            <h1 style="font-size:1.5rem; color:#0a2b4e; margin-bottom:4px;">🏥 Nursing Handover Endorsement</h1>
+            <p style="font-size:0.9rem; color:#64748b;">Floor: <strong id="printFloorName"></strong> · Printed: <span id="printDate"></span></p>
+        </div>
+        <div class="endorsement-header no-print">
+            <h3>Shift Endorsement — <span id="endorsementFloorName"></span></h3>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn btn-primary btn-sm" id="printEndorsementBtn">🖨️ Print / Save PDF</button>
+                <button class="btn btn-secondary btn-sm" id="closeEndorsement">✕ Close</button>
+            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="endorsement-table" id="endorsementTable">
+                <thead>
+                    <tr>
+                        <th>Bed</th>
+                        <th>Patient</th>
+                        <th>Medical No.</th>
+                        <th>Age/Sex</th>
+                        <th>Admission</th>
+                        <th>Diagnosis</th>
+                        <th>Allergies</th>
+                        <th>Lines / Tubes</th>
+                        <th>Meds</th>
+                        <th>Risk</th>
+                        <th>Tasks / To‑do</th>
+                    </tr>
+                </thead>
+                <tbody id="endorsementBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ARCHIVE PANEL -->
+    <div class="stats-panel hidden" id="archivePanel">
+        <h3>🗂️ Patient Archive & Search</h3>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Search by name or medical number...">
+            <select id="searchFloor">
+                <option value="">All Floors</option>
+                <option value="2">Second Floor</option>
+                <option value="3">Third Floor</option>
+                <option value="4">Fourth Floor</option>
+                <option value="icu">ICU</option>
+            </select>
+            <select id="searchStatus">
+                <option value="">All Status</option>
+                <option value="active">Active (currently admitted)</option>
+                <option value="discharged">Discharged</option>
+                <option value="transferred">Transferred</option>
+            </select>
+            <button class="btn btn-primary btn-sm" id="searchBtn">🔍 Search</button>
+            <button class="btn btn-secondary btn-sm" id="clearSearchBtn">✕ Clear</button>
+        </div>
+        <div id="archiveResults"></div>
+    </div>
+</div>
+
+<div id="modalContainer"></div>
+<div id="toastContainer"></div>
+
+<script>
+    // ================== STATE ==================
+    const floors = {
+        '2': { name: 'Second Floor', type: 'Internal', icon: '🏢', beds: generateBeds(2001, 2024, ['2015(1)', '2015(2)', '2017(1)', '2017(2)', '2019(1)', '2019(2)']) },
+        '3': { name: 'Third Floor', type: 'Internal', icon: '🏢', beds: generateBeds(3001, 3024, ['3015(1)', '3015(2)', '3017(1)', '3017(2)', '3019(1)', '3019(2)']) },
+        '4': { name: 'Fourth Floor', type: 'Internal', icon: '🏢', beds: generateBeds(4001, 4024, ['4015(1)', '4015(2)', '4017(1)', '4017(2)', '4019(1)', '4019(2)']) },
+        'icu': { name: 'ICU / Critical Care', type: 'ICU', icon: '🚨', beds: Array.from({ length: 30 }, (_, i) => 5001 + i) }
+    };
+
+    function generateBeds(start, end, extras = []) {
+        const beds = [];
+        for (let i = start; i <= end; i++) {
+            if (!extras.some(e => e.startsWith(i + '('))) beds.push(i.toString());
+        }
+        return [...beds, ...extras].sort((a, b) => {
+            const na = parseInt(a), nb = parseInt(b);
+            if (na !== nb) return na - nb;
+            return a.localeCompare(b);
+        });
+    }
+
+    let patients = {};
+    let archivedPatients = []; // patient records after discharge
+    let currentFloor = '2';
+    let history = [];
+    let currentUser = null;
+
+    // ================== HELPERS ==================
+    function getFloorBeds(k) { return floors[k].beds; }
+    function getPatient(b) { return patients[b] || null; }
+    function savePatient(b, d) { patients[b] = { ...d, bed: b }; }
+    function removePatient(b) { delete patients[b]; }
+
+    function todayStr() { return new Date().toISOString().split('T')[0]; }
+    function nowTime() { return new Date().toTimeString().slice(0,5); }
+
+    function showToast(msg, type = 'success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = 'toast';
+        if (type === 'danger') t.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+        if (type === 'warning') t.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        if (type === 'info') t.style.background = 'linear-gradient(135deg, #8b5cf6, #6d28d9)';
+        t.innerHTML = `<span>${type === 'success' ? '✓' : type === 'danger' ? '⚠' : type === 'info' ? 'ℹ' : '⏳'}</span> ${msg}`;
+        c.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(50px)'; setTimeout(() => t.remove(), 400); }, 2600);
+    }
+
+    function logHistory(type, bed, patientName, details) {
+        history.unshift({
+            type, bed, patientName, details,
+            date: todayStr(), time: nowTime(),
+            user: currentUser?.username || 'system',
+            ts: Date.now()
+        });
+        if (history.length > 500) history = history.slice(0, 500);
+    }
+
+    // ================== LOGIN ==================
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('loginUser').value.trim();
+        const role = document.getElementById('loginRole').value;
+        if (!username) return showToast('Please enter username', 'warning');
+        currentUser = { username, role };
+        document.getElementById('userName').textContent = username;
+        document.getElementById('userRole').textContent = role;
+        document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('app').style.display = 'block';
+        renderAll();
+        showToast(`Welcome, ${username}! Logged in as ${role}`);
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        if (confirm('🚪 Logout? Unsaved changes will be lost.')) {
+            currentUser = null;
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPass').value = '';
+        }
+    });
+
+    // ================== RENDER ==================
+    function renderFloorSelector() {
+        const c = document.getElementById('floorSelector');
+        c.innerHTML = '';
+        ['2', '3', '4', 'icu'].forEach(k => {
+            const beds = getFloorBeds(k);
+            const occ = beds.filter(b => patients[b]).length;
+            const btn = document.createElement('button');
+            btn.className = `floor-btn ${currentFloor === k ? 'active' : ''}`;
+            btn.innerHTML = `<span>${floors[k].icon}</span> ${floors[k].name} <span class="badge-count">${occ}/${beds.length}</span>`;
+            btn.onclick = () => { currentFloor = k; renderAll(); };
+            c.appendChild(btn);
+        });
+    }
+
+    function renderDashboard() {
+        const beds = getFloorBeds(currentFloor);
+        const total = beds.length;
+        const occ = beds.filter(b => patients[b]).length;
+        const todayAdmitted = beds.filter(b => patients[b]?.admissionDate === todayStr()).length;
+        const todayDischarged = history.filter(h => h.type === 'discharge' && h.date === todayStr() && beds.includes(h.bed)).length;
+        const surgeries = beds.filter(b => patients[b]?.surgery).length;
+        const bedridden = beds.filter(b => patients[b]?.bedridden).length;
+
+        document.getElementById('dashboardStats').innerHTML = `
+            <div class="stat-card stat-blue"><div class="stat-icon">🛏️</div><div class="stat-content"><h4>Total Beds</h4><div class="value">${total}</div></div></div>
+            <div class="stat-card stat-green"><div class="stat-icon">👥</div><div class="stat-content"><h4>Occupied</h4><div class="value">${occ}</div></div></div>
+            <div class="stat-card stat-cyan"><div class="stat-icon">📥</div><div class="stat-content"><h4>Admitted Today</h4><div class="value">${todayAdmitted}</div></div></div>
+            <div class="stat-card stat-red"><div class="stat-icon">📤</div><div class="stat-content"><h4>Discharged Today</h4><div class="value">${todayDischarged}</div></div></div>
+            <div class="stat-card stat-orange"><div class="stat-icon">🔪</div><div class="stat-content"><h4>Surgeries</h4><div class="value">${surgeries}</div></div></div>
+            <div class="stat-card stat-purple"><div class="stat-icon">🛏️</div><div class="stat-content"><h4>Bedridden</h4><div class="value">${bedridden}</div></div></div>
+        `;
+    }
+
+    function renderBedGrid() {
+        const beds = getFloorBeds(currentFloor);
+        const grid = document.getElementById('bedGrid');
+        grid.innerHTML = '';
+        document.getElementById('floorTitle').textContent = `${floors[currentFloor].icon} ${floors[currentFloor].name}`;
+
+        beds.forEach(bed => {
+            const p = getPatient(bed);
+            const card = document.createElement('div');
+            card.className = `bed-card ${p ? 'occupied' : ''}`;
+            card.innerHTML = `
+                <div class="bed-number">${bed}</div>
+                ${p ? `<div class="patient-name" title="${p.name}">${p.name || '—'}</div>` : `<div class="patient-name">Available</div>`}
+            `;
+            card.onclick = () => openPatientModal(bed);
+            grid.appendChild(card);
+        });
+    }
+
+    function renderTodoList() {
+        const beds = getFloorBeds(currentFloor);
+        const c = document.getElementById('todoList');
+        c.innerHTML = '';
+        let todos = [];
+
+        beds.forEach(bed => {
+            const p = getPatient(bed);
+            if (!p) return;
+            (p.tasks || []).forEach((t, idx) => {
+                if (!t.done) todos.push({ bed, name: p.name, text: t.text, type: t.type || 'Task', taskIdx: idx });
+            });
+            if (p.investigationsFollowUp?.trim() && !(p.tasks || []).some(t => t.text === p.investigationsFollowUp)) {
+                todos.push({ bed, name: p.name, text: p.investigationsFollowUp, type: 'Follow up', legacy: true });
+            }
+            if (p.pendingInvestigations?.trim() && !(p.tasks || []).some(t => t.text === p.pendingInvestigations)) {
+                todos.push({ bed, name: p.name, text: p.pendingInvestigations, type: 'Pending', legacy: true });
+            }
+        });
+
+        if (todos.length === 0) {
+            c.innerHTML = '<div style="padding:16px; text-align:center; color:#94a3b8; font-size:0.85rem;">✨ No pending tasks.</div>';
+            return;
+        }
+
+        todos.forEach((t) => {
+            const d = document.createElement('div');
+            d.className = 'todo-item';
+            d.innerHTML = `
+                <div class="todo-info"><strong>Bed ${t.bed}</strong> · ${t.name || 'Patient'} — ${t.text}</div>
+                <div class="todo-actions">
+                    <span class="todo-badge">${t.type}</span>
+                    <button class="btn-done" data-bed="${t.bed}" data-idx="${t.taskIdx ?? ''}" data-legacy="${t.legacy ? 1 : 0}">✓ Done</button>
+                </div>
+            `;
+            c.appendChild(d);
+        });
+
+        c.querySelectorAll('.btn-done').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const bed = btn.dataset.bed;
+                const idx = btn.dataset.idx;
+                const isLegacy = btn.dataset.legacy === '1';
+                const p = getPatient(bed);
+                if (!p) return;
+
+                if (!isLegacy && idx !== '') {
+                    const task = p.tasks[parseInt(idx)];
+                    task.done = true;
+                    task.completedAt = todayStr() + ' ' + nowTime();
+                    logHistory('done', bed, p.name, `Task completed: ${task.text}`);
+                    showToast('Task marked as done');
+                } else {
+                    p.investigationsFollowUp = '';
+                    p.pendingInvestigations = '';
+                    logHistory('done', bed, p.name, 'Investigation marked done');
+                    showToast('Investigation marked done');
+                }
+                renderAll();
+            };
+        });
+    }
+
+    function renderAll() {
+        if (!currentUser) return;
+        renderFloorSelector();
+        renderDashboard();
+        renderBedGrid();
+        renderTodoList();
+        if (!document.getElementById('endorsementPanel').classList.contains('hidden')) renderEndorsement();
+        if (!document.getElementById('statsPanel').classList.contains('hidden')) renderStats();
+    }
+
+    // ================== PATIENT MODAL ==================
+    function openPatientModal(bed) {
+        const ex = getPatient(bed);
+        const isNew = !ex;
+        let tempTasks = ex?.tasks ? JSON.parse(JSON.stringify(ex.tasks)) : [];
+
+        const html = `
+        <div class="modal-overlay" id="patientModalOverlay">
+            <div class="modal">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                    <div>
+                        <h2>${isNew ? 'Admit New Patient' : 'Patient Details'}</h2>
+                        <span class="modal-badge">🛏️ Bed ${bed} · ${floors[currentFloor].name}</span>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">×</button>
+                </div>
+
+                <div class="modal-tabs">
+                    <button type="button" class="modal-tab active" data-tab="info">📋 Information</button>
+                    <button type="button" class="modal-tab" data-tab="tasks">✅ Tasks & Investigations</button>
+                    <button type="button" class="modal-tab" data-tab="history">📜 History</button>
+                </div>
+
+                <form id="patientForm">
+                    <div class="tab-content active" data-tab="info">
+                        <div class="section-title">Patient Information</div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Full Name</label><input name="name" value="${ex?.name || ''}" required placeholder="e.g. John Doe"></div>
+                            <div class="form-group"><label>Medical Number</label><input name="medicalNumber" value="${ex?.medicalNumber || ''}" placeholder="e.g. 123456"></div>
+                            <div class="form-group"><label>Gender</label>
+                                <select name="gender">
+                                    <option value="Male" ${ex?.gender === 'Male' ? 'selected' : ''}>Male</option>
+                                    <option value="Female" ${ex?.gender === 'Female' ? 'selected' : ''}>Female</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Age</label><input name="age" type="number" value="${ex?.age || ''}" placeholder="e.g. 45"></div>
+                            <div class="form-group"><label>Admission Date</label><input name="admissionDate" type="date" value="${ex?.admissionDate || todayStr()}"></div>
+                            <div class="form-group"><label>Admission Time</label><input name="admissionTime" type="time" value="${ex?.admissionTime || nowTime()}"></div>
+                        </div>
+
+                        <div class="section-title">Clinical Assessment</div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Condition on Admission</label><input name="condition" value="${ex?.condition || ''}" placeholder="e.g. Stable"></div>
+                            <div class="form-group"><label>Medical Diagnosis</label><input name="diagnosis" value="${ex?.diagnosis || ''}" placeholder="e.g. Pneumonia"></div>
+                            <div class="form-group"><label>Medical History</label><input name="medicalHistory" value="${ex?.medicalHistory || ''}" placeholder="e.g. HTN, DM"></div>
+                        </div>
+
+                        <div class="section-title">Allergies & Risk Assessment</div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="hasAllergy" ${ex?.hasAllergy ? 'checked' : ''}> ⚠️ Has Allergy</label>
+                            <div class="form-group" style="flex:1; min-width:200px;"><input name="allergyDetails" placeholder="Allergy details" value="${ex?.allergyDetails || ''}"></div>
+                        </div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="bedridden" ${ex?.bedridden ? 'checked' : ''}> 🛏️ Bedridden</label>
+                            <label><input type="checkbox" name="fallRisk" ${ex?.fallRisk ? 'checked' : ''}> 🚨 Fall Risk</label>
+                            <label><input type="checkbox" name="pressureUlcer" ${ex?.pressureUlcer ? 'checked' : ''}> 🩹 Pressure Ulcer</label>
+                            <label><input type="checkbox" name="isICU" ${ex?.isICU ? 'checked' : ''}> 🚨 ICU Patient</label>
+                            <div class="form-group" style="flex:1; min-width:180px;"><input name="ulcerLocation" placeholder="Ulcer location" value="${ex?.ulcerLocation || ''}"></div>
+                        </div>
+
+                        <div class="section-title">Lines & Medications</div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Lines / Tubes</label><input name="lines" placeholder="e.g. CVC, Foley" value="${ex?.lines || ''}"></div>
+                            <div class="form-group"><label>Current Medications</label><input name="medications" placeholder="e.g. Ceftriaxone" value="${ex?.medications || ''}"></div>
+                        </div>
+
+                        <div class="section-title">Notes & Discharge</div>
+                        <div class="form-group"><label>Notes</label><textarea name="notes" rows="2">${ex?.notes || ''}</textarea></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Discharge Date</label><input name="dischargeDate" type="date" value="${ex?.dischargeDate || ''}"></div>
+                            <div class="form-group"><label>Discharge Time</label><input name="dischargeTime" type="time" value="${ex?.dischargeTime || ''}"></div>
+                        </div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="surgery" ${ex?.surgery ? 'checked' : ''}> 🔪 Surgery today</label>
+                            <div class="form-group" style="flex:1; min-width:200px;"><input name="surgeryDetails" placeholder="Surgery details" value="${ex?.surgeryDetails || ''}"></div>
+                        </div>
+
+                        <div class="section-title">🔄 Transfer Patient</div>
+                        <div class="transfer-selector">
+                            <span>Move to:</span>
+                            <select name="transferFloor" id="transferFloorSelect">
+                                <option value="">— Stay —</option>
+                                ${Object.keys(floors).map(f => `<option value="${f}" ${ex?.transferFloor === f ? 'selected' : ''}>${floors[f].icon} ${floors[f].name}</option>`).join('')}
+                            </select>
+                            <select name="transferBed" id="transferBedSelect"><option value="">— Select bed —</option></select>
+                            <button type="button" class="btn btn-secondary btn-sm" id="doTransferBtn" style="background:var(--purple); color:white;">Transfer →</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" data-tab="tasks">
+                        <div class="section-title">➕ Add New Task / Investigation</div>
+                        <div class="task-builder">
+                            <input type="text" id="newTaskText" placeholder="e.g. CBC, Chest X-ray, Physiotherapy">
+                            <select id="newTaskType">
+                                <option value="Investigation">Investigation</option>
+                                <option value="Follow-up">Follow-up</option>
+                                <option value="Medication">Medication</option>
+                                <option value="Procedure">Procedure</option>
+                                <option value="Vitals">Vitals</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <button type="button" class="btn btn-primary btn-sm" id="addTaskBtn">＋ Add</button>
+                        </div>
+                        <div class="task-list" id="taskList"></div>
+                    </div>
+
+                    <div class="tab-content" data-tab="history">
+                        <div class="section-title">📜 Patient History</div>
+                        <div class="history-timeline" id="patientHistory"></div>
+                    </div>
+
+                    <div class="modal-actions">
+                        ${!isNew ? `<button type="button" class="btn btn-danger" id="dischargePatientBtn">🚪 Discharge</button>` : ''}
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">💾 Save Patient</button>
+                    </div>
+                </form>
+            </div>
+        </div>`;
+
+        document.getElementById('modalContainer').innerHTML = html;
+
+        document.querySelectorAll('.modal-tab').forEach(tab => {
+            tab.onclick = () => {
+                document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelector(`.tab-content[data-tab="${tab.dataset.tab}"]`).classList.add('active');
+            };
+        });
+
+        function renderTasks() {
+            const c = document.getElementById('taskList');
+            if (!c) return;
+            if (tempTasks.length === 0) {
+                c.innerHTML = '<div style="padding:16px; text-align:center; color:#94a3b8; font-size:0.85rem;">No tasks yet.</div>';
+                return;
+            }
+            c.innerHTML = tempTasks.map((t, i) => `
+                <div class="task-chip ${t.done ? 'done' : 'pending'}">
+                    <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                        <span style="font-weight:700; color:var(--primary);">${t.type}</span>
+                        <span>${t.text}</span>
+                        ${t.done ? `<span style="font-size:0.7rem; color:#059669;">✓ ${t.completedAt || ''}</span>` : ''}
+                    </div>
+                    <div class="chip-actions">
+                        ${!t.done ? `<button type="button" class="chip-btn done-btn" data-idx="${i}" title="Mark done">✓</button>` : ''}
+                        <button type="button" class="chip-btn del-btn" data-idx="${i}" title="Delete">✕</button>
+                    </div>
+                </div>
+            `).join('');
+
+            c.querySelectorAll('.done-btn').forEach(b => {
+                b.onclick = () => {
+                    const i = parseInt(b.dataset.idx);
+                    tempTasks[i].done = true;
+                    tempTasks[i].completedAt = todayStr() + ' ' + nowTime();
+                    renderTasks();
+                    showToast('Task marked as done');
+                };
+            });
+            c.querySelectorAll('.del-btn').forEach(b => {
+                b.onclick = () => { tempTasks.splice(parseInt(b.dataset.idx), 1); renderTasks(); };
+            });
+        }
+
+        document.getElementById('addTaskBtn').onclick = () => {
+            const text = document.getElementById('newTaskText').value.trim();
+            const type = document.getElementById('newTaskType').value;
+            if (!text) return showToast('Please enter task text', 'warning');
+            tempTasks.push({ text, type, done: false, createdAt: todayStr() + ' ' + nowTime() });
+            document.getElementById('newTaskText').value = '';
+            renderTasks();
+        };
+
+        renderTasks();
+
+        function renderPatientHistory() {
+            const c = document.getElementById('patientHistory');
+            if (!c) return;
+            const entries = history.filter(h => h.bed === bed);
+            if (entries.length === 0) {
+                c.innerHTML = '<div style="padding:16px; text-align:center; color:#94a3b8; font-size:0.85rem;">No history for this patient yet.</div>';
+                return;
+            }
+            c.innerHTML = entries.map(h => `
+                <div class="history-entry ${h.type}">
+                    <div class="h-time">${h.date} ${h.time}</div>
+                    <div class="h-text"><strong>${h.type.toUpperCase()}</strong> — ${h.details} <em style="color:#94a3b8; font-size:0.75rem;">(by ${h.user})</em></div>
+                </div>
+            `).join('');
+        }
+        renderPatientHistory();
+
+        const tfs = document.getElementById('transferFloorSelect');
+        const tbs = document.getElementById('transferBedSelect');
+        if (tfs) {
+            tfs.addEventListener('change', function () {
+                const f = this.value;
+                tbs.innerHTML = '<option value="">— Select bed —</option>';
+                if (f) {
+                    floors[f].beds.filter(b => !patients[b] || b === bed).forEach(b => {
+                        const o = document.createElement('option');
+                        o.value = b;
+                        o.textContent = b + (patients[b] && b !== bed ? ' (occupied)' : '');
+                        if (patients[b] && b !== bed) o.disabled = true;
+                        tbs.appendChild(o);
+                    });
+                }
+            });
+            if (ex?.transferFloor) { tfs.value = ex.transferFloor; tfs.dispatchEvent(new Event('change')); }
+        }
+
+        document.getElementById('doTransferBtn')?.addEventListener('click', () => {
+            const tf = tfs.value, tb = tbs.value;
+            if (!tf || !tb) return showToast('Please select target floor and bed.', 'warning');
+            if (patients[tb] && tb !== bed) return showToast('Target bed is occupied.', 'danger');
+
+            const fd = new FormData(document.getElementById('patientForm'));
+            const p = {};
+            fd.forEach((v, k) => p[k] = v);
+            p.surgery = fd.get('surgery') === 'on';
+            p.hasAllergy = fd.get('hasAllergy') === 'on';
+            p.bedridden = fd.get('bedridden') === 'on';
+            p.fallRisk = fd.get('fallRisk') === 'on';
+            p.pressureUlcer = fd.get('pressureUlcer') === 'on';
+            p.isICU = fd.get('isICU') === 'on';
+            p.bed = tb;
+            p.tasks = tempTasks;
+
+            const oldBed = bed;
+            const oldFloor = currentFloor;
+            removePatient(oldBed);
+            savePatient(tb, p);
+            logHistory('transfer', tb, p.name, `Transferred from bed ${oldBed} (${floors[oldFloor].name}) → bed ${tb} (${floors[tf].name})`);
+            showToast(`Patient transferred to ${floors[tf].name} · Bed ${tb}`);
+            closeModal();
+            renderAll();
+        });
+
+        document.getElementById('dischargePatientBtn')?.addEventListener('click', () => {
+            if (confirm('🚪 Discharge this patient? The bed will be freed and record archived.')) {
+                const p = getPatient(bed);
+                p.dischargeDate = todayStr();
+                p.dischargeTime = nowTime();
+                p.floorKey = currentFloor;
+                p.floorName = floors[currentFloor].name;
+                // Archive the patient
+                archivedPatients.unshift({ ...p, archivedAt: new Date().toISOString() });
+                logHistory('discharge', bed, p.name, `Discharged from bed ${bed} (${floors[currentFloor].name})`);
+                showToast(`Patient discharged & archived`);
+                removePatient(bed);
+                closeModal();
+                renderAll();
+            }
+        });
+
+        document.getElementById('patientForm').addEventListener('submit', e => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            const p = {};
+            fd.forEach((v, k) => p[k] = v);
+            p.surgery = fd.get('surgery') === 'on';
+            p.hasAllergy = fd.get('hasAllergy') === 'on';
+            p.bedridden = fd.get('bedridden') === 'on';
+            p.fallRisk = fd.get('fallRisk') === 'on';
+            p.pressureUlcer = fd.get('pressureUlcer') === 'on';
+            p.isICU = fd.get('isICU') === 'on';
+            p.bed = bed;
+            p.floorKey = currentFloor;
+            p.floorName = floors[currentFloor].name;
+            p.tasks = tempTasks;
+
+            if (isNew) {
+                if (!p.admissionDate) p.admissionDate = todayStr();
+                if (!p.admissionTime) p.admissionTime = nowTime();
+                logHistory('admission', bed, p.name, `Admitted to bed ${bed} (${floors[currentFloor].name})`);
+                if (p.surgery) logHistory('surgery', bed, p.name, `Surgery: ${p.surgeryDetails || 'performed'}`);
+            } else {
+                if (p.surgery && !ex.surgery) logHistory('surgery', bed, p.name, `Surgery: ${p.surgeryDetails || 'performed'}`);
+                // detect newly completed tasks
+                const oldTasks = ex.tasks || [];
+                tempTasks.forEach((t, i) => {
+                    if (t.done && (!oldTasks[i] || !oldTasks[i].done)) {
+                        logHistory('done', bed, p.name, `Task completed: ${t.text}`);
+                    }
+                });
+            }
+            savePatient(bed, p);
+            showToast(isNew ? 'Patient admitted successfully' : 'Patient updated');
+            closeModal();
+            renderAll();
+        });
+    }
+
+    // ================== STATS ==================
+    function renderStats() {
+        document.getElementById('statsFloorName').textContent = floors[currentFloor].name;
+        const beds = getFloorBeds(currentFloor);
+        const today = todayStr();
+
+        const total = beds.length;
+        const occupied = beds.filter(b => patients[b]).length;
+        const newAdmissionsToday = history.filter(h => h.type === 'admission' && h.date === today && beds.includes(h.bed)).length;
+        const dischargesToday = history.filter(h => h.type === 'discharge' && h.date === today && beds.includes(h.bed)).length;
+        const surgeriesToday = history.filter(h => h.type === 'surgery' && h.date === today && beds.includes(h.bed)).length;
+        const icuPatients = beds.filter(b => patients[b]?.isICU).length;
+        const bedriddenCount = beds.filter(b => patients[b]?.bedridden).length;
+        const fallRiskCount = beds.filter(b => patients[b]?.fallRisk).length;
+        const pressureUlcerCount = beds.filter(b => patients[b]?.pressureUlcer).length;
+        const transfersIn = history.filter(h => h.type === 'transfer' && h.date === today && beds.includes(h.bed)).length;
+        const withTasks = beds.filter(b => (patients[b]?.tasks || []).some(t => !t.done)).length;
+
+        document.getElementById('statsGrid').innerHTML = `
+            <div class="stat-box"><div class="label">Total Beds</div><div class="num">${total}</div></div>
+            <div class="stat-box green"><div class="label">Currently Occupied</div><div class="num">${occupied}</div></div>
+            <div class="stat-box"><div class="label">New Admissions Today</div><div class="num">${newAdmissionsToday}</div></div>
+            <div class="stat-box red"><div class="label">Discharges Today</div><div class="num">${dischargesToday}</div></div>
+            <div class="stat-box orange"><div class="label">Surgeries Today</div><div class="num">${surgeriesToday}</div></div>
+            <div class="stat-box purple"><div class="label">ICU Patients</div><div class="num">${icuPatients}</div></div>
+            <div class="stat-box"><div class="label">Bedridden</div><div class="num">${bedriddenCount}</div></div>
+            <div class="stat-box orange"><div class="label">Fall Risk</div><div class="num">${fallRiskCount}</div></div>
+            <div class="stat-box pink"><div class="label">Pressure Ulcers</div><div class="num">${pressureUlcerCount}</div></div>
+            <div class="stat-box purple"><div class="label">Transfers Today</div><div class="num">${transfersIn}</div></div>
+            <div class="stat-box green"><div class="label">With Pending Tasks</div><div class="num">${withTasks}</div></div>
+        `;
+
+        const hist = document.getElementById('historyTimeline');
+        const floorHist = history.filter(h => beds.includes(h.bed));
+        if (floorHist.length === 0) {
+            hist.innerHTML = '<div style="padding:16px; text-align:center; color:#94a3b8; font-size:0.85rem;">No history on this floor yet.</div>';
+        } else {
+            hist.innerHTML = floorHist.map(h => `
+                <div class="history-entry ${h.type}">
+                    <div class="h-time">${h.date} ${h.time}</div>
+                    <div class="h-text"><strong>Bed ${h.bed}</strong> — ${h.patientName || 'Patient'}: ${h.details}</div>
+                </div>
+            `).join('');
+        }
+    }
+
+    document.getElementById('statsBtn').addEventListener('click', () => {
+        const p = document.getElementById('statsPanel');
+        p.classList.toggle('hidden');
+        if (!p.classList.contains('hidden')) {
+            renderStats();
+            p.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    // ================== ENDORSEMENT + PRINT ==================
+    function renderEndorsement() {
+        document.getElementById('endorsementFloorName').textContent = floors[currentFloor].name;
+        document.getElementById('printFloorName').textContent = floors[currentFloor].name;
+        document.getElementById('printDate').textContent = new Date().toLocaleString();
+
+        const tb = document.getElementById('endorsementBody');
+        tb.innerHTML = '';
+        const beds = getFloorBeds(currentFloor).sort((a, b) => {
+            const na = parseInt(a), nb = parseInt(b);
+            if (na !== nb) return na - nb;
+            return a.localeCompare(b);
+        });
+
+        beds.forEach(bed => {
+            const p = getPatient(bed);
+            if (!p) return;
+            const pendingTasks = (p.tasks || []).filter(t => !t.done).map(t => `${t.type}: ${t.text}`).join(', ');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${bed}</strong></td>
+                <td>${p.name || '—'}</td>
+                <td>${p.medicalNumber || '—'}</td>
+                <td>${p.age || '?'} / ${p.gender ? p.gender[0] : '?'}</td>
+                <td>${p.admissionDate || '—'}<br><span style="color:#94a3b8;font-size:0.75rem;">${p.admissionTime || ''}</span></td>
+                <td>${p.diagnosis || '—'}</td>
+                <td>${p.hasAllergy ? '⚠️ ' + (p.allergyDetails || 'Yes') : '—'}</td>
+                <td>${p.lines || '—'}</td>
+                <td>${p.medications || '—'}</td>
+                <td>${p.fallRisk ? '🚨 ' : ''}${p.bedridden ? '🛏️ ' : ''}${p.pressureUlcer ? '🩹' : ''}${!p.fallRisk && !p.bedridden && !p.pressureUlcer ? '—' : ''}</td>
+                <td>${pendingTasks || p.investigationsFollowUp || p.pendingInvestigations || '—'}</td>
+            `;
+            tb.appendChild(tr);
+        });
+
+        if (tb.children.length === 0) {
+            tb.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:32px; color:#94a3b8;">No patients on this floor.</td></tr>';
+        }
+    }
+
+    document.getElementById('endorsementBtn').addEventListener('click', () => {
+        const p = document.getElementById('endorsementPanel');
+        p.classList.toggle('hidden');
+        if (!p.classList.contains('hidden')) {
+            renderEndorsement();
+            p.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    document.getElementById('closeEndorsement').addEventListener('click', () => {
+        document.getElementById('endorsementPanel').classList.add('hidden');
+    });
+
+    document.getElementById('printEndorsementBtn').addEventListener('click', () => {
+        document.getElementById('printDate').textContent = new Date().toLocaleString();
+        document.getElementById('printFloorName').textContent = floors[currentFloor].name;
+        window.print();
+    });
+
+    // ================== ARCHIVE / SEARCH ==================
+    function renderArchive(filter = {}) {
+        const c = document.getElementById('archiveResults');
+        const allRecords = [];
+
+        // active patients
+        Object.keys(patients).forEach(bed => {
+            const p = patients[bed];
+            allRecords.push({ ...p, status: 'active', archived: false });
+        });
+
+        // archived patients
+        archivedPatients.forEach(p => {
+            allRecords.push({ ...p, status: 'discharged', archived: true });
+        });
+
+        let filtered = allRecords;
+        if (filter.query) {
+            const q = filter.query.toLowerCase();
+            filtered = filtered.filter(r =>
+                (r.name || '').toLowerCase().includes(q) ||
+                (r.medicalNumber || '').toLowerCase().includes(q)
+            );
+        }
+        if (filter.floor) filtered = filtered.filter(r => r.floorKey === filter.floor);
+        if (filter.status) filtered = filtered.filter(r => r.status === filter.status);
+
+        if (filtered.length === 0) {
+            c.innerHTML = '<div style="padding:32px; text-align:center; color:#94a3b8;">🔍 No records found matching your search.</div>';
+            return;
+        }
+
+        c.innerHTML = filtered.map(r => `
+            <div class="archive-card" onclick="openArchiveRecord('${r.medicalNumber || ''}','${r.bed}','${r.status}')">
+                <h4>
+                    <span>${r.name || 'Unknown'} ${r.medicalNumber ? '· ' + r.medicalNumber : ''}</span>
+                    <span class="status-badge status-${r.status}">${r.status === 'active' ? '● Active' : r.status === 'discharged' ? '🚪 Discharged' : '🔄 Transferred'}</span>
+                </h4>
+                <div class="archive-meta">
+                    <span>🛏️ Bed ${r.bed}</span>
+                    <span>🏢 ${r.floorName || floors[r.floorKey]?.name || '—'}</span>
+                    <span>👤 ${r.age || '?'} yrs · ${r.gender || '?'}</span>
+                    <span>📅 ${r.admissionDate || '—'}</span>
+                    ${r.dischargeDate ? `<span>🚪 Discharged: ${r.dischargeDate}</span>` : ''}
+                </div>
+                <div class="archive-detail">
+                    <strong>Diagnosis:</strong> ${r.diagnosis || '—'}${r.hasAllergy ? ` · <span style="color:#dc2626; font-weight:600;">⚠️ Allergy: ${r.allergyDetails || 'Yes'}</span>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.openArchiveRecord = function(medNum, bed, status) {
+        let record = null;
+        if (status === 'active') record = patients[bed];
+        else record = archivedPatients.find(p => (p.medicalNumber || '') === medNum && p.bed === bed);
+
+        if (!record) return showToast('Record not found', 'danger');
+
+        const modalHtml = `
+        <div class="modal-overlay" id="recordModalOverlay" onclick="if(event.target===this) closeModal()">
+            <div class="modal" style="max-width:800px;">
+                <h2>📋 Patient Record <button class="modal-close" onclick="closeModal()">×</button></h2>
+                <span class="modal-badge">${status === 'active' ? '● Currently Admitted' : '🚪 Discharged'}</span>
+
+                <div class="section-title">Personal Information</div>
+                <div class="form-grid">
+                    <div><label style="font-size:0.7rem;color:#94a3b8;font-weight:700;text-transform:uppercase;">Name</label><div style="font-weight:600;padding:6px 0;">${record.name || '—'}</div></div>
+                    <div><label style="font-size:0.7rem;color:#94a3b8;font-weight:700;text-transform:uppercase;">Medical No.</label><div style="font-weight:600;padding:6px 0;">${record.medicalNumber || '—'}</div></div>
+                    <div><label style="font-size:0.7rem;color:#94a3b8;font-weight:700;text-transform:uppercase;">Age / Gender</label><div style="font-weight:600;padding:6px 0;">${record.age || '?'} / ${record.gender || '—'}</div></div>
+                    <div><label style="font-size:0.7rem;color:#94a3b8;font-weight:700;text-transform:uppercase;">Bed / Floor</label><div style="font-weight:600;padding:6px 0;">${record.bed} · ${record.floorName || floors[record.floorKey]?.name || '—'}</div></div>
+                    <div><label style="font-size:0.7rem;color:#94a3b8;font-weight:700;text-transform:uppercase;">Admission</label><div style="font-weight:600;padding:6px 0;">${record.admissionDate || '—'} ${record.admissionTime || ''}</div></div>
+                    <div><label style="font-size:0.7rem;color:#94a3b8;font-weight:700;text-transform:uppercase;">Discharge</label><div style="font-weight:600;padding:6px 0;">${record.dischargeDate || '—'} ${record.dischargeTime || ''}</div></div>
+                </div>
+
+                <div class="section-title">Clinical</div>
+                <div class="form-grid">
+                    <div><label style="font-size:0.7rem;color:#94a3b8;font-weight:700;text-transform:uppercase;">Diagnosis</label><div style="padding:6px 0;">${record.diagnosis || '—'}</div></div>
+                    <div><label style="font-size:0.7rem;color:#94a3b8;font-weight:700;text-transform:uppercase;">Medical History</label><div style="padding:6px 0;">${record.medicalHistory || '—'}</div></div>
+                    <div><label style="font-size:0.7rem;color:#94a3b8;font-weight:700;text-transform:uppercase;">Condition</label><div style="padding:6px 0;">${record.condition || '—'}</div></div>
+                </div>
+
+                <div class="section-title">Allergies & Risks</div>
+                <div style="padding:6px 0;">
+                    ${record.hasAllergy ? `<span style="color:#dc2626;">⚠️ Allergy: ${record.allergyDetails || 'Yes'}</span><br>` : ''}
+                    ${record.fallRisk ? '🚨 Fall Risk · ' : ''}
+                    ${record.bedridden ? '🛏️ Bedridden · ' : ''}
+                    ${record.pressureUlcer ? `🩹 Pressure Ulcer (${record.ulcerLocation || 'location N/A'}) · ` : ''}
+                    ${record.isICU ? '🚨 ICU Patient · ' : ''}
+                    ${record.surgery ? `🔪 Surgery: ${record.surgeryDetails || 'performed'}` : ''}
+                </div>
+
+                <div class="section-title">Lines / Meds</div>
+                <div style="padding:6px 0;">
+                    <strong>Lines:</strong> ${record.lines || '—'}<br>
+                    <strong>Medications:</strong> ${record.medications || '—'}
+                </div>
+
+                <div class="section-title">Notes</div>
+                <div style="padding:6px 0;">${record.notes || '—'}</div>
+
+                <div class="section-title">Tasks</div>
+                <div style="padding:6px 0;">
+                    ${(record.tasks || []).length === 0 ? '—' : (record.tasks || []).map(t =>
+                        `<div style="padding:4px 0;">${t.done ? '✅' : '⏳'} <strong>${t.type}</strong>: ${t.text} ${t.done ? `<em style="color:#059669;font-size:0.75rem;">(${t.completedAt})</em>` : ''}</div>`
+                    ).join('')}
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-primary" onclick="printRecord()">🖨️ Print Record</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
+                </div>
+            </div>
+        </div>`;
+        document.getElementById('modalContainer').innerHTML = modalHtml;
+    };
+
+    window.printRecord = function() {
+        const modal = document.querySelector('#recordModalOverlay .modal');
+        const win = window.open('', '', 'width=900,height=650');
+        win.document.write('<html><head><title>Patient Record</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#0f172a;}h2{color:#0a2b4e;border-bottom:2px solid #0a2b4e;padding-bottom:8px;}.section-title{background:#e8f3fc;padding:6px 12px;border-left:4px solid #10b981;margin:14px 0 6px;font-weight:700;font-size:0.85rem;text-transform:uppercase;}label{display:block;font-size:0.7rem;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-top:6px;}div{font-size:0.9rem;}</style></head><body>');
+        win.document.write('<h2>🏥 Patient Record</h2>');
+        win.document.write(modal.innerHTML.replace(/<button[^>]*>.*?<\/button>/g, '').replace(/<div class="modal-badge">.*?<\/div>/, ''));
+        win.document.write('</body></html>');
+        win.document.close();
+        setTimeout(() => { win.print(); }, 400);
+    };
+
+    document.getElementById('archiveBtn').addEventListener('click', () => {
+        const p = document.getElementById('archivePanel');
+        p.classList.toggle('hidden');
+        if (!p.classList.contains('hidden')) {
+            renderArchive();
+            p.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    document.getElementById('searchBtn').addEventListener('click', () => {
+        renderArchive({
+            query: document.getElementById('searchInput').value.trim(),
+            floor: document.getElementById('searchFloor').value,
+            status: document.getElementById('searchStatus').value
+        });
+    });
+
+    document.getElementById('clearSearchBtn').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchFloor').value = '';
+        document.getElementById('searchStatus').value = '';
+        renderArchive();
+    });
+
+    document.getElementById('searchInput').addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') document.getElementById('searchBtn').click();
+    });
+
+    // ================== GLOBAL ==================
+    window.closeModal = function () {
+        document.getElementById('modalContainer').innerHTML = '';
+    };
+
+    document.getElementById('addPatientBtn').addEventListener('click', () => {
+        const beds = getFloorBeds(currentFloor);
+        const free = beds.find(b => !patients[b]);
+        if (free) openPatientModal(free);
+        else showToast('No free beds on this floor!', 'warning');
+    });
+
+    // ================== INIT ==================
+    // auto-login demo user for preview
+    document.getElementById('loginUser').value = 'nurse1';
+    document.getElementById('loginPass').value = '1234';
+
+    // demo data seeding (only once page loads)
+    setTimeout(() => {
+        savePatient('2001', { name: 'Ahmed Mohamed', medicalNumber: 'M-1001', gender: 'Male', age: 45, admissionDate: todayStr(), admissionTime: '08:30', condition: 'Stable', diagnosis: 'Pneumonia', medicalHistory: 'HTN', hasAllergy: true, allergyDetails: 'Penicillin', bedridden: false, fallRisk: true, pressureUlcer: false, lines: 'Peripheral IV', medications: 'Ceftriaxone 1g', surgery: false, bed: '2001', floorKey: '2', floorName: 'Second Floor', tasks: [
+            { text: 'CBC', type: 'Investigation', done: false, createdAt: todayStr() + ' 09:00' },
+            { text: 'Chest X-ray', type: 'Investigation', done: true, createdAt: todayStr() + ' 08:45', completedAt: todayStr() + ' 10:15' },
+            { text: 'Physiotherapy', type: 'Follow-up', done: false, createdAt: todayStr() + ' 09:30' }
+        ] });
+        logHistory('admission', '2001', 'Ahmed Mohamed', 'Admitted to bed 2001 (Second Floor)');
+        logHistory('done', '2001', 'Ahmed Mohamed', 'Task completed: Chest X-ray');
+
+        savePatient('2003', { name: 'Sara Ali', medicalNumber: 'M-1002', gender: 'Female', age: 62, admissionDate: todayStr(), admissionTime: '14:15', condition: 'Critical', diagnosis: 'CHF', medicalHistory: 'DM, HTN', hasAllergy: false, bedridden: true, fallRisk: true, pressureUlcer: true, ulcerLocation: 'Sacrum', lines: 'CVC, Foley', medications: 'Furosemide 40mg', surgery: true, surgeryDetails: 'Cardiac catheterization', bed: '2003', floorKey: '2', floorName: 'Second Floor', tasks: [
+            { text: 'Echo', type: 'Investigation', done: false, createdAt: todayStr() + ' 15:00' },
+            { text: 'Daily weight', type: 'Vitals', done: false, createdAt: todayStr() + ' 15:10' }
+        ] });
+        logHistory('admission', '2003', 'Sara Ali', 'Admitted to bed 2003 (Second Floor)');
+        logHistory('surgery', '2003', 'Sara Ali', 'Surgery: Cardiac catheterization');
+
+        savePatient('5001', { name: 'Omar Khalid', medicalNumber: 'M-2001', gender: 'Male', age: 70, admissionDate: todayStr(), admissionTime: '22:00', condition: 'Critical', diagnosis: 'Respiratory Failure', hasAllergy: false, bedridden: true, fallRisk: true, isICU: true, lines: 'ETT, CVC, Art line', medications: 'Propofol drip', surgery: false, bed: '5001', floorKey: 'icu', floorName: 'ICU / Critical Care', tasks: [
+            { text: 'ABG q6h', type: 'Investigation', done: false, createdAt: todayStr() + ' 22:30' },
+            { text: 'Chest physiotherapy', type: 'Procedure', done: false, createdAt: todayStr() + ' 22:45' }
+        ] });
+        logHistory('admission', '5001', 'Omar Khalid', 'Admitted to bed 5001 (ICU)');
+
+        // demo archived patient
+        archivedPatients.push({
+            name: 'Fatma Ibrahim', medicalNumber: 'M-0900', gender: 'Female', age: 58,
+            admissionDate: '2025-01-08', admissionTime: '10:00',
+            dischargeDate: '2025-01-12', dischargeTime: '14:00',
+            diagnosis: 'Post-op Appendectomy', medicalHistory: 'None',
+            hasAllergy: false, bedridden: false, fallRisk: false, pressureUlcer: false,
+            surgery: true, surgeryDetails: 'Appendectomy',
+            lines: 'Peripheral IV', medications: 'Analgesics',
+            bed: '2005', floorKey: '2', floorName: 'Second Floor',
+            status: 'discharged', archivedAt: new Date().toISOString(), tasks: []
+        });
+    }, 100);
+</script>
+</body>
+</html>
